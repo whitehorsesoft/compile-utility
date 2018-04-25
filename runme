@@ -1,5 +1,5 @@
 #!/bin/bash
 # My first script
 
-# ldc ./concurrency2.d -unittest -run ./main -w
-ldc -main -w -wi -unittest -run ./compileutil.d
+ldc ./compileutil.d -unittest -run ./main -w
+# ldc -main -w -wi -unittest -run ./compileutil.d
