@@ -34,26 +34,31 @@ class Config {
       .array;
 
     auto fileJSONs = getSavedFiles;
-    foreach(file; files) {
+    if (fileJSONs.toString == `"na"`) return;
+
+    for(auto i = 0; i < files.length; i++) {
       auto tempFiles = fileJSONs["files"]
         .array
-        .filter!(f => f["fileName"].str == file.fileName)
+        .filter!(f => f["fileName"].str == files[i].fileName)
         .array;
-      writeln(tempFiles.count);
       if (tempFiles.count > 0) {
         if (tempFiles[0]["isChosen"].integer == 1) {
-          file.isChosen = true;
+          files[i].isChosen = true;
         }
       }
     }
   }
 
   JSONValue getSavedFiles() {
+    if (!"chosen_files.txt".exists)
+      return JSONValue("na");
+
     string result;
     auto file = File("chosen_files.txt", "r");
-    while (!file.eof) {
+    //while (!file.eof) {
       result = strip(file.readln);
-    }
+    // }
+    // if (!matchFirst(result, r"\S")) return JSONValue("na");
     return parseJSON(result);
   }
 
@@ -73,7 +78,7 @@ class Config {
 
     JSONValue result = ["files" : fileJSONs];
     
-    auto file = File("chosen_files", "w");
+    auto file = File("chosen_files.txt", "w");
     file.writeln(result.toString);
   }
 
