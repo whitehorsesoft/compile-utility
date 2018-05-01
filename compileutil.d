@@ -22,29 +22,62 @@ class Config {
   import std.array;
   import std.regex;
   import std.stdio;
+  import std.json;
 
   FileEntry[] files;
   string flags;
 
   void loadFiles() {
-    auto saveFiles = getSavedFiles;
-
     files = dirEntries("", SpanMode.shallow)
       .filter!(e => e.isFile)
-      .map!(e => getFileEntry(e, saveFiles))
+      .map!(e => getFileEntry(e))
       .array;
+
+    auto fileJSONs = getSavedFiles;
+    foreach(file; files) {
+      auto tempFiles = fileJSONs["files"]
+        .array
+        .filter!(f => f["fileName"].str == file.fileName)
+        .array;
+      writeln(tempFiles.count);
+      if (tempFiles.count > 0) {
+        if (tempFiles[0]["isChosen"].integer == 1) {
+          file.isChosen = true;
+        }
+      }
+    }
   }
 
-  string[] getSavedFiles() {
-    string[] result;
+  JSONValue getSavedFiles() {
+    string result;
     auto file = File("chosen_files.txt", "r");
     while (!file.eof) {
-      result ~= strip(file.readln);
+      result = strip(file.readln);
     }
-    return result;
+    return parseJSON(result);
   }
 
-  FileEntry getFileEntry(DirEntry dirEntry, string[] savedFiles) {
+  void saveFiles() {
+    JSONValue[] fileJSONs;
+    foreach(file; files) {
+      JSONValue tempJSON = ["fileName" : file.fileName];
+      if (file.isChosen) {
+        tempJSON.object["isChosen"] = JSONValue(1);
+      }
+      else {
+        tempJSON.object["isChosen"] = JSONValue(0);
+      }
+
+      fileJSONs ~= tempJSON;
+    }
+
+    JSONValue result = ["files" : fileJSONs];
+    
+    auto file = File("chosen_files", "w");
+    file.writeln(result.toString);
+  }
+
+  FileEntry getFileEntry(DirEntry dirEntry) {
     auto fileName = baseName(dirEntry.name);
     auto isMain = (fileName == "main");
     FileEntry dFile;

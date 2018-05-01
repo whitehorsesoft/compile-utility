@@ -7,7 +7,6 @@ import std.string;
 void main() {
   auto config = new Config();
   config.loadFiles;
-
   configloop(config);
 }
 
@@ -23,6 +22,7 @@ void configloop(Config config) {
     else {
       config.files[inputInt].isChosen = true;
     }
+    config.saveFiles;
   }
 }
 
