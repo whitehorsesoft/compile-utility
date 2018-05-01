@@ -17,28 +17,41 @@ struct FileEntry {
 class Config {
   import std.file;
   import std.path;
+  import std.string:strip;
+  import std.algorithm;
+  import std.array;
+  import std.regex;
+  import std.stdio;
 
   FileEntry[] files;
   string flags;
 
   void loadFiles() {
-    import std.algorithm;
-    import std.path;
-    import std.array;
+    auto saveFiles = getSavedFiles;
 
     files = dirEntries("", SpanMode.shallow)
       .filter!(e => e.isFile)
-      .map!(e => getFileEntry(e))
+      .map!(e => getFileEntry(e, saveFiles))
       .array;
   }
 
-  FileEntry getFileEntry(DirEntry dirEntry) {
-    // auto fileName = baseName(stripExtension(dirEntry.name));
+  string[] getSavedFiles() {
+    string[] result;
+    auto file = File("chosen_files.txt", "r");
+    while (!file.eof) {
+      result ~= strip(file.readln);
+    }
+    return result;
+  }
+
+  FileEntry getFileEntry(DirEntry dirEntry, string[] savedFiles) {
     auto fileName = baseName(dirEntry.name);
     auto isMain = (fileName == "main");
     FileEntry dFile;
     dFile.isMain = isMain;
     dFile.fileName = fileName;
+
+    if (matchFirst(fileName, r"main\.d")) dFile.isMain = true;
     return dFile;
   }
 }
