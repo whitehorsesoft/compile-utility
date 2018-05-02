@@ -10,7 +10,7 @@ import std.format;
 
 void inputLoop() {
   auto config = new Config();
-  config.loadFiles;
+  config.load;
 
   string inputStr;
   do {
@@ -28,6 +28,9 @@ bool inputParser(Config config, string inputStr) {
     case "f":
       fileLoop(config);
       return true;
+    case "fl":
+      tagLoop(config);
+      return true;
   }
 }
 
@@ -41,10 +44,9 @@ void fileLoop(Config config) {
 }
 
 bool fileParser(Config config, string inputStr) {
-  int inputInt;
   if (matchFirst(inputStr, r"\D")) return false;
 
-  inputInt = inputStr.to!int;
+  int inputInt = inputStr.to!int;
   if (0 > inputInt || inputInt >= config.files.count) return false;
   else {
     if (config.files[inputInt].isChosen) {
@@ -53,7 +55,7 @@ bool fileParser(Config config, string inputStr) {
     else {
       config.files[inputInt].isChosen = true;
     }
-    config.saveFiles;
+    config.save;
     return true;
   }
 }
@@ -75,4 +77,32 @@ string listFiles(Config config) {
     result ~= fileLine;
   }
   return result.join("\n");
+}
+
+void tagLoop(Config config) {
+  string inputStr;
+  do {
+    writeln(listFlags(config));
+    writeln("Enter a flag to toggle or 'q' to quit");
+    inputStr = readln.strip;
+  } while (tagParser(config, inputStr));
+}
+
+bool tagParser(Config config, string inputStr) {
+  // -q is not a compiler flag, at least for ldc
+  if (inputStr == "q") return false;
+
+  if (config.flags.any!(f => f == inputStr)) {
+    config.flags = config.flags.remove!(f => f == inputStr);
+  }
+  else {
+    config.flags ~= inputStr;
+  }
+
+  config.save;
+  return true;
+}
+
+string listFlags(Config config) {
+  return config.flags.join(" ");
 }

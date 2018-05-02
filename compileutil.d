@@ -17,9 +17,9 @@ class Config {
   import std.json;
 
   FileEntry[] files;
-  string flags;
+  string[] flags;
 
-  void loadFiles() {
+  void load() {
     // get all files in current dir
     files = dirEntries("", SpanMode.shallow)
       .filter!(e => e.isFile)
@@ -43,16 +43,16 @@ class Config {
   }
 
   JSONValue getSavedFiles() {
-    if (!"chosen_files.json".exists)
+    if (!"saved_info.json".exists)
       return JSONValue("na");
 
     string result;
-    auto file = File("chosen_files.json", "r");
+    auto file = File("saved_info.json", "r");
     result = strip(file.readln);
     return parseJSON(result);
   }
 
-  void saveFiles() {
+  void save() {
     JSONValue[] fileJSONs;
     foreach(file; files) {
       JSONValue tempJSON = ["fileName" : file.fileName];
@@ -67,8 +67,9 @@ class Config {
     }
 
     JSONValue result = ["files" : fileJSONs];
+    result.object["flags"] = JSONValue(flags);
     
-    auto file = File("chosen_files.json", "w");
+    auto file = File("saved_info.json", "w");
     file.writeln(result.toString);
   }
 
