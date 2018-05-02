@@ -18,6 +18,8 @@ void inputLoop() {
     inputStr = readln.strip;
   }
   while (inputParser(config, inputStr));
+
+  writeln(finalOutput(config));
 }
 
 private:
@@ -105,4 +107,38 @@ bool tagParser(Config config, string inputStr) {
 
 string listFlags(Config config) {
   return config.flags.join(" ");
+}
+
+string finalOutput(Config config) {
+  // if main module present, disallow -main flag
+  if (config.files.any!(f => f.isMain)) {
+    config.flags.remove!(f => f == "main");
+  }
+  // if main module not present, make sure -main flag is present
+  else if(!config.flags.any!(f => f == "main")) {
+    config.flags ~= "main";
+  }
+
+  // start to build output string
+  string output = "ldc";
+  
+  if (config.files.count > 0) {
+    output ~= " ";
+
+    string tempFiles = config.files
+      .filter!(f => f.isChosen)
+      .map!(f => "./" ~ f.fileName)
+      .join(" ");
+    output ~= tempFiles;
+  }
+
+  if (config.flags.count > 0) {
+    output ~= " ";
+    
+    output ~= config.flags
+      .map!(f => "-" ~ f)
+      .join(" ");
+  }
+
+  return output;
 }
