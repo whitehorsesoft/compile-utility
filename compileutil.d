@@ -26,6 +26,7 @@ class Config {
       .map!(e => getFileEntry(e))
       .array;
 
+    // mark files with saved information
     auto fileJSONs = getSavedFiles;
     if (fileJSONs.toString == `"na"`) return;
 
@@ -40,6 +41,13 @@ class Config {
         }
       }
     }
+
+    // load flag settings
+    auto tempFlags = fileJSONs["flags"]
+      .array
+      .map!(f => f.str)
+      .array;
+    flags = tempFlags;
   }
 
   JSONValue getSavedFiles() {
