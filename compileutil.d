@@ -1,13 +1,5 @@
 module whs.compileutil;
 
-/* if no command line args, run main
-if no main, run lib
-if command line args, display 
-# ldc ./simplesocket.d ./main -w -wi -unittest
-or
-# ldc -main -w -wi -unittest -run ./compileutil.d
-*/
-
 struct FileEntry {
   bool isChosen;
   bool isMain;
@@ -28,6 +20,7 @@ class Config {
   string flags;
 
   void loadFiles() {
+    // get all files in current dir
     files = dirEntries("", SpanMode.shallow)
       .filter!(e => e.isFile)
       .map!(e => getFileEntry(e))
@@ -50,15 +43,12 @@ class Config {
   }
 
   JSONValue getSavedFiles() {
-    if (!"chosen_files.txt".exists)
+    if (!"chosen_files.json".exists)
       return JSONValue("na");
 
     string result;
-    auto file = File("chosen_files.txt", "r");
-    //while (!file.eof) {
-      result = strip(file.readln);
-    // }
-    // if (!matchFirst(result, r"\S")) return JSONValue("na");
+    auto file = File("chosen_files.json", "r");
+    result = strip(file.readln);
     return parseJSON(result);
   }
 
@@ -78,7 +68,7 @@ class Config {
 
     JSONValue result = ["files" : fileJSONs];
     
-    auto file = File("chosen_files.txt", "w");
+    auto file = File("chosen_files.json", "w");
     file.writeln(result.toString);
   }
 
@@ -93,3 +83,4 @@ class Config {
     return dFile;
   }
 }
+

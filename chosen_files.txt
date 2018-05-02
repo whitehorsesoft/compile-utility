@@ -1,1 +1,0 @@
-{"files":[{"fileName":"README.md","isChosen":0},{"fileName":"LICENSE","isChosen":1},{"fileName":"chosen_files.txt","isChosen":1},{"fileName":"main.d","isChosen":0},{"fileName":"runme","isChosen":0},{"fileName":"compileutil.d","isChosen":0}]}
