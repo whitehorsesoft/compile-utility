@@ -8,10 +8,7 @@ import std.conv;
 import std.algorithm;
 import std.format;
 
-void inputLoop() {
-  auto config = new Config();
-  config.load;
-
+void inputLoop(Config config) {
   string inputStr;
   do {
     write("input msg here ");
@@ -20,6 +17,73 @@ void inputLoop() {
   while (inputParser(config, inputStr));
 
   writeln(finalOutput(config));
+}
+
+string finalOutput(Config config) {
+  // if no files present, return blank
+  if (config.files.count < 1) return "";
+
+  // if main module present, disallow -main flag
+  if (config.files.any!(f => f.isMain)) {
+    config.flags.remove!(f => f == "main");
+  }
+  // if main module not present, make sure -main flag is present
+  else if(!config.flags.any!(f => f == "main")) {
+    config.flags ~= "main";
+  }
+
+  // if run flag set, pull either main.d or first .d file from file listing
+  string fileToRun;
+
+  if (config.flags.any!(f => f == "run")) {
+
+    auto i = config.files.countUntil!(f => f.isMain);
+    if (i >=0 ) {
+      fileToRun = config.files[i].fileName;
+      config.files = config.files.remove(i);
+    }
+    else {
+      fileToRun = config.files[0].fileName;
+      config.files = config.files.remove(0);
+    }
+  }
+
+  // start to build output string
+  string output = "ldc";
+  
+  if (config.files.count > 0) {
+    output ~= " ";
+
+    string tempFiles = config.files
+      .filter!(f => f.isChosen)
+      .map!(f => "./" ~ f.fileName)
+      .join(" ");
+    output ~= tempFiles;
+  }
+
+  if (config.flags.count > 0) {
+    output ~= " ";
+
+    // put 'run' flag at end, if it exists
+    auto i = config.flags.countUntil!(f => f == "run");
+    if (i >= 0) {
+      auto tempFlag = config.flags[i];
+      config.flags = config.flags.remove(i);
+      config.flags ~= tempFlag;
+    }
+
+    output ~= config.flags
+      .map!(f => "-" ~ f)
+      .join(" ");
+  }
+
+  // if run flag exists, fileToRun should be populated, and should be added last
+  if (fileToRun.length > 0) {
+    output ~= " ./";
+    output ~= fileToRun;
+  }
+
+  return output;
 }
 
 private:
@@ -109,36 +173,3 @@ string listFlags(Config config) {
   return config.flags.join(" ");
 }
 
-string finalOutput(Config config) {
-  // if main module present, disallow -main flag
-  if (config.files.any!(f => f.isMain)) {
-    config.flags.remove!(f => f == "main");
-  }
-  // if main module not present, make sure -main flag is present
-  else if(!config.flags.any!(f => f == "main")) {
-    config.flags ~= "main";
-  }
-
-  // start to build output string
-  string output = "ldc";
-  
-  if (config.files.count > 0) {
-    output ~= " ";
-
-    string tempFiles = config.files
-      .filter!(f => f.isChosen)
-      .map!(f => "./" ~ f.fileName)
-      .join(" ");
-    output ~= tempFiles;
-  }
-
-  if (config.flags.count > 0) {
-    output ~= " ";
-    
-    output ~= config.flags
-      .map!(f => "-" ~ f)
-      .join(" ");
-  }
-
-  return output;
-}

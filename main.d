@@ -8,8 +8,20 @@ or
 
 module whs.main;
 
+import whs.compileutil;
 import whs.inputfuncs;
+import std.stdio;
 
-void main() {
-  inputLoop;
+void main(string[] args) {
+  auto config = new Config();
+  config.load;
+
+  writeln(args);
+  if (args.length == 0) {
+    writeln(config.finalOutput);
+  }
+  else {
+    inputLoop(config);
+  }
 }
+
