@@ -158,12 +158,7 @@ bool tagParser(Config config, string inputStr) {
   // -q is not a compiler flag, at least for ldc
   if (inputStr == "q") return false;
 
-  if (config.flags.any!(f => f == inputStr)) {
-    config.flags = config.flags.remove!(f => f == inputStr);
-  }
-  else {
-    config.flags ~= inputStr;
-  }
+  config.flags = config.flags.toggleItem(inputStr);
 
   config.save;
   return true;
@@ -173,3 +168,11 @@ string listFlags(Config config) {
   return config.flags.join(" ");
 }
 
+T[] toggleItem(T)(T[] targets, T item) {
+  if (targets.any!(t => t == item)) {
+    return targets.remove!(t => t == item);
+  }
+  else {
+    return targets ~= item;
+  }
+}

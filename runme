@@ -1,5 +1,0 @@
-#!/bin/bash
-# My first script
-
-ldc ./compileutil.d ./inputfuncs.d -unittest -run ./main -w
-# ldc -main -w -wi -unittest -run ./compileutil.d
