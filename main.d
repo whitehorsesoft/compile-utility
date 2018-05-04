@@ -16,8 +16,7 @@ void main(string[] args) {
   auto config = new Config();
   config.load;
 
-  writeln(args);
-  if (args.length == 0) {
+  if (args.length == 1) {
     writeln(config.finalOutput);
   }
   else {
