@@ -2,6 +2,7 @@ module whs.main;
 
 import whs.compileutil;
 import whs.inputfuncs;
+import whs.diskfuncs;
 import std.stdio;
 
 void main(string[] args) {
