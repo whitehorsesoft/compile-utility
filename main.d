@@ -1,11 +1,11 @@
 module whs.main;
 
-import whs.compileutil;
-import whs.inputfuncs;
-import whs.diskfuncs;
-import std.stdio;
-
 void main(string[] args) {
+  import whs.compileutil;
+  import whs.diskfuncs: load;
+  import whs.inputfuncs: inputLoop;
+  import std.stdio: writeln;
+
   auto config = new Config();
   config.load;
 

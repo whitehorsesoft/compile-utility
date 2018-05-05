@@ -1,7 +1,6 @@
 module whs.compileutil;
-  import std.json;
-  import std.format;
-  import std.file;
+  import std.json: JSONValue;
+  import std.file: DirEntry;
 
 struct FileEntry {
   bool isChosen;
@@ -28,14 +27,6 @@ interface IConfig(TData, TError, TErrMsg, TFileId, TFlagId) {
 }
 
 class Config : IConfig!(JSONValue, bool, string, int, string) {
-  import std.file;
-  import std.path;
-  import std.string:strip;
-  import std.algorithm;
-  import std.array;
-  import std.regex;
-  import std.stdio;
-
   private FileEntry[] _files;
   private string[] _flags;
 
@@ -43,6 +34,9 @@ class Config : IConfig!(JSONValue, bool, string, int, string) {
   string[] flags() @property { return _flags; }
 
   MultiResult!(bool, string) populate(DirEntry[] fileList, JSONValue dataToParse) {
+    import std.algorithm: map, filter, count;
+    import std.array: array;
+
     try {
       // populate _files
       _files = fileList.map!(f => getFileEntry(f)).array;
@@ -77,6 +71,8 @@ class Config : IConfig!(JSONValue, bool, string, int, string) {
   }
  
   MultiResult!(bool, JSONValue) serialized() {
+    import std.json: object;
+
     try {
       JSONValue[] fileJSONs;
       foreach(file; files) {
@@ -102,6 +98,9 @@ class Config : IConfig!(JSONValue, bool, string, int, string) {
   }
 
   string finalOutput() {
+    import std.algorithm: count, any, remove, countUntil, map, filter;
+    import std.string: join;
+
     // if no files present, return blank
     if (_files.count < 1) return "";
 
@@ -169,6 +168,10 @@ class Config : IConfig!(JSONValue, bool, string, int, string) {
   }
 
   string listFiles() {
+    import std.algorithm: count;
+    import std.string: join;
+    import std.format: format;
+
     string[] result;
     for (int i = 0; i < _files.count; i++) {
       auto file = _files[i];
@@ -188,6 +191,8 @@ class Config : IConfig!(JSONValue, bool, string, int, string) {
   }
 
   string listFlags() {
+    import std.string: join;
+
     return _flags.join(" ");
   }
 
@@ -203,6 +208,9 @@ class Config : IConfig!(JSONValue, bool, string, int, string) {
 
 private:
   FileEntry getFileEntry(DirEntry dirEntry) {
+    import std.regex: matchFirst;
+    import std.path: baseName;
+
     auto fileName = baseName(dirEntry.name);
     auto isMain = (fileName == "main");
     FileEntry dFile;
@@ -215,7 +223,7 @@ private:
 }
 
 T[] toggleItem(T)(T[] targets, T item) {
-  import std.algorithm;
+  import std.algorithm: any, remove;
 
   if (targets.any!(t => t == item)) {
     return targets.remove!(t => t == item);

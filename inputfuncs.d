@@ -2,15 +2,11 @@ module whs.inputfuncs;
 
 import whs.compileutil;
 import whs.diskfuncs;
-import std.stdio;
-import std.string;
-import std.regex;
-import std.conv;
-import std.algorithm;
-import std.format;
-import std.json;
 
 void inputLoop(TData, TError, TErrMsg, TFileId, TFlagId)(IConfig!(TData, TError, TErrMsg, TFileId, TFlagId) config) {
+  import std.stdio: write, readln, writeln;
+  import std.string: strip;
+
   string inputStr;
   do {
     write("'f' for files, 'fl' for flags, 'q' to exit: ");
@@ -36,6 +32,9 @@ bool inputParser(TData, TError, TErrMsg, TFileId, TFlagId)(IConfig!(TData, TErro
 }
 
 void fileLoop(TData, TError, TErrMsg, TFileId, TFlagId)(IConfig!(TData, TError, TErrMsg, TFileId, TFlagId) config) {
+  import std.stdio: writeln, readln;
+  import std.string: strip;
+
   string inputStr;
   do {
     writeln(config.listFiles);
@@ -46,6 +45,10 @@ void fileLoop(TData, TError, TErrMsg, TFileId, TFlagId)(IConfig!(TData, TError, 
 }
 
 bool fileParser(TData, TError, TErrMsg, TFileId, TFlagId)(IConfig!(TData, TError, TErrMsg, TFileId, TFlagId) config, string inputStr) {
+  import std.algorithm: count;
+  import std.regex: matchFirst;
+  import std.conv: to;
+
   if (matchFirst(inputStr, r"\D")) return false;
 
   int inputInt = inputStr.to!int;
@@ -58,6 +61,9 @@ bool fileParser(TData, TError, TErrMsg, TFileId, TFlagId)(IConfig!(TData, TError
 }
 
 void tagLoop(TData, TError, TErrMsg, TFileId, TFlagId)(IConfig!(TData, TError, TErrMsg, TFileId, TFlagId) config) {
+  import std.stdio: writeln, readln;
+  import std.string: strip;
+
   string inputStr;
   do {
     writeln(config.listFlags);
